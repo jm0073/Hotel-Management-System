@@ -1,0 +1,56 @@
+/*create or replace Procedure settings(c in int) as  
+    chh int:=c;  
+    begin  
+    dbms_output.put_line('1. Add Room');  
+	dbms_output.put_line('2. Add Employee');  
+	dbms_output.put_line('3. Update Employee'); 
+	if chh=1 then
+        add_room(106,'standard','empty',10000);
+	elsif chh=2 then
+        add_employee(3,'Vivek','housekeeper',12000,'45 Gandhi Colony',9876534332);
+	elsif chh=3 then
+        update_employee(3,'Vivek','housekeeper',15000,'45 Gandhi Colony',9876534432);
+	else
+		dbms_output.put_line('Invalid choice');
+end if;
+end;
+/ */
+
+declare 
+a int:=5; 
+ch int:=0; --Enter choice here(leave default at 0)
+n int;
+begin 
+	while a!=0 loop 
+		dbms_output.put_line('Welcome to THE PLAZA!'); 
+		dbms_output.put_line('---Menu---'); 
+		dbms_output.put_line('1. Settings'); 
+		dbms_output.put_line('2. Check available rooms');
+		dbms_output.put_line('3. Add Guest'); 
+		dbms_output.put_line('4. Reserve Room'); 
+		dbms_output.put_line('5. Check In Guest'); 
+		dbms_output.put_line('6. Check out Guest');
+		dbms_output.put_line('                  '); 
+		dbms_output.put_line('Your Choice is: '||ch);
+		if ch=1 then 
+			settings(0); --Enter choice here(leave default at 0)
+		elsif ch=2 then
+            n:=check_room('standard');
+		elsif ch=3 then
+            add_guest('Ayesha','304 Sector 3, Panchkula',9876631792,'agupta@gmail.com');
+		elsif ch=4 then
+            make_reservation(1,'standard',date'2023-04-25');
+		elsif ch=5 then
+            cin_guest(1);
+		elsif ch=6 then
+            cout_guest(1,date'2023-04-26');
+		elif ch=7 then
+		reservations_report();
+		elif ch=8 then
+		check_in_out_report();
+		else
+            dbms_output.put_line('Invalid Choice');
+		end if; 
+		a:=0; 
+	end loop; 
+end; 

@@ -1,0 +1,216 @@
+create table employee(emp_id int Primary Key, emp_name varchar(250), emp_role varchar(250), emp_sal int, emp_address varchar(250), emp_phn int);
+create table hotel(h_name varchar(250), h_address varchar(250), h_phn varchar(250));
+create table room(r_id int Primary Key, r_type varchar(250), r_state varchar(20) check(r_state in ('reserved','occupied','empty')), r_rate int);
+create table guest(g_id int Primary Key,g_name varchar(255), g_address varchar(250), g_phn varchar(250), g_email varchar(250));
+create table reservation(reser_id int Primary Key, r_id int, g_id int, check_in_date date, Foreign Key(r_id) References room(r_id), Foreign Key(g_id) References guest(g_id));
+create table check_in(cin_id int Primary Key, g_id int, r_id int,cin_date date, Foreign Key(r_id) References room(r_id), Foreign Key(g_id) References guest(g_id));
+create table check_out(cout_id int Primary Key, g_id int, r_id int,cout_date date, Foreign Key(r_id) References room(r_id), Foreign Key(g_id) References guest(g_id));
+create table bill(b_id int Primary Key, g_id int, r_id int, cin_date date, cout_date date, total_amount int, payment_status varchar(250), Foreign Key(r_id) References room(r_id), Foreign Key(g_id) References guest(g_id));
+create table inventory(inv_id int Primary Key, inv_name varchar(250), inv_qty int, inv_rate int);
+
+
+
+
+CREATE OR REPLACE PROCEDURE add_room(j_id IN NUMBER, j_type IN varchar, j_state IN varchar, j_rate IN int) AS
+BEGIN
+    INSERT INTO room(r_id, r_type, r_state,r_rate) VALUES (j_id, j_type , j_state, j_rate);
+    
+    DBMS_OUTPUT.PUT_LINE('New Room Added with id: ' || j_id || '.');
+END; 
+/
+CREATE or replace PROCEDURE add_employee 
+    (emp_id_val in int, emp_name_val varchar,emp_role_val in varchar,emp_sal_val in int,emp_address_val in varchar,emp_phn_val in varchar) as
+BEGIN
+  INSERT INTO employee VALUES (emp_id_val, emp_name_val, emp_role_val, emp_sal_val, emp_address_val, emp_phn_val);
+  DBMS_OUTPUT.PUT_LINE('New employee added with id: ' || emp_id_val || '.');
+END;
+/
+CREATE or replace PROCEDURE update_employee
+(emp_id_val in int,emp_name_val in varchar,emp_role_val in varchar,emp_sal_val in int,emp_address_val in varchar,emp_phn_val in varchar) as
+BEGIN
+  UPDATE employee SET
+    emp_name = emp_name_val,
+    emp_role = emp_role_val,
+    emp_sal = emp_sal_val,
+    emp_address = emp_address_val,
+    emp_phn = emp_phn_val
+  WHERE emp_id = emp_id_val;
+  DBMS_OUTPUT.PUT_LINE('Employee with id: ' || emp_id_val || ' info has been updated.');
+END;
+/
+
+
+
+create or replace function check_room(j_type IN room.r_type%type) return int as
+ct int:=0;
+r room.r_id%type;
+cursor c1 is select r_id from room where r_state='empty' and r_type=j_type;
+begin
+open c1;
+DBMS_OUTPUT.PUT_LINE('Following rooms of type '||j_type||' are avaliable:');
+loop
+fetch c1 into r;
+exit when c1%notfound;
+dbms_output.put_line(r);
+ct:=ct+1;
+end loop;
+return ct;
+end; 
+/
+CREATE OR REPLACE PROCEDURE add_guest(g_name IN varchar, g_add IN varchar, g_phn IN int,g_mail in varchar) AS
+    gid int;
+BEGIN
+    select max(g_id)+1 into gid from guest;
+	if gid is NULL then
+        gid:=1;
+	end if;
+    INSERT INTO guest(g_id,g_name,g_address,g_phn,g_email) VALUES(gid,g_name,g_add,g_phn,g_mail);
+    
+    DBMS_OUTPUT.PUT_LINE('New Guest '||g_name||' Added with id: ' || gid || '.');
+END; 
+/ 
+create or replace procedure make_reservation(g_id in number,r_typ in varchar,dt in date) as
+    r_no int:=0;
+	res_no int;
+	b_no int;
+begin
+    select r_id into r_no from room where r_state='empty' and r_type=r_typ FETCH FIRST ROWS ONLY;
+	if r_no!=0 then
+		select max(reser_id)+1 into res_no from reservation;
+		if res_no is NULL then
+            res_no:=1;
+		end if;
+    	insert into reservation values(res_no,r_no,g_id,dt);
+
+		update room set r_state='reserved' where r_id=r_no;
+
+		select max(b_id)+1 into b_no from bill;
+		if b_no is NULL then
+            b_no:=1;
+		end if;
+		INSERT INTO bill(b_id, g_id, r_id, cin_date, payment_status) VALUES(b_no,g_id,r_no,dt,'pending');
+		dbms_output.put_line('Your reservation was successful. Room number is: '||r_no);
+	else
+		dbms_output.put_line('Your reservation was not successful. NO empty room!');
+end if;
+end;
+/
+create or replace procedure cin_guest(gid in int) as
+    room int:=0;
+	dt date;
+	cid int;
+begin
+	select r_id into room from reservation where g_id=gid;
+	if room!=0 then
+        select check_in_date into dt from reservation where g_id=gid;
+		select max(cin_id)+1 into cid from check_in;	
+		if cid is NULL then
+       		cid:=1;
+		end if;
+		insert into check_in values(cid,gid,room,dt);
+		dbms_output.put_line('You can check in to Room no: '||room);
+
+		update room set r_state='occupied' where r_id=room;
+		delete from reservation where r_id=room; 
+	else
+		dbms_output.put_line('You dont have a reservation.');
+end if;
+end; 
+/  
+create or replace procedure generate_bill(gid in int) as
+	room int;
+	room_rate int;
+	cin date;
+	cout date;
+	diff int;
+	ta int;
+begin 
+	select r_id,cin_date, cout_date into room,cin,cout from bill where g_id=gid;
+	select r_rate into room_rate from room where r_id=room;
+	select (cout-cin) into diff from dual;
+	ta:=diff*room_rate;
+	update bill set total_amount=ta where g_id=gid;
+end;
+/
+create or replace procedure cout_guest(gid in int,ctdt date) as
+    ta int;
+	room int;
+	cid int;
+begin
+    select max(cout_id)+1 into cid from check_out;
+	if cid is NULL then
+        cid:=1;
+	end if;
+	select r_id into room from check_in where g_id=gid;
+	insert into check_out values(cid,gid,room,ctdt);
+	update bill set cout_date=ctdt where g_id=gid;
+	generate_bill(gid);
+	select total_amount into ta from bill where g_id=gid;
+ dbms_output.put_line('Checking Out...');
+	dbms_output.put_line('Your Total Bill is: '||ta);
+	update bill set payment_status='clear' where g_id=gid;
+	update room set r_state='empty' where r_id=room;
+ dbms_output.put_line('Payment Successful!');
+ dbms_output.put_line('Thanks for staying :-)');
+end; 
+/  
+CREATE OR REPLACE PROCEDURE reservations_report
+IS
+
+  cursor_reservations SYS_REFCURSOR;
+  r_guest_id guest.g_id%TYPE;
+  r_guest_name guest.g_name%TYPE;
+  r_room_id room.r_id%TYPE;
+  r_checkin_date reservation.check_in_date%TYPE;
+BEGIN
+  OPEN cursor_reservations FOR
+    SELECT guest.g_id, guest.g_name, reservation.r_id, reservation.check_in_date
+    FROM guest
+    JOIN reservation ON guest.g_id = reservation.g_id
+    JOIN room ON reservation.r_id = room.r_id
+    ORDER BY guest.g_id;
+  
+  DBMS_OUTPUT.PUT_LINE('RESERVATIONS REPORT');
+  DBMS_OUTPUT.PUT_LINE('------------------------------------');
+  DBMS_OUTPUT.PUT_LINE('GUEST ID | GUEST NAME | ROOM ID | CHECK-IN DATE ');
+  
+  LOOP
+    FETCH cursor_reservations INTO r_guest_id, r_guest_name, r_room_id, r_checkin_date;
+    EXIT WHEN cursor_reservations%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE(r_guest_id || '   |   ' || r_guest_name || '   |   ' || r_room_id || '   |   ' || r_checkin_date );
+  END LOOP;
+  
+  CLOSE cursor_reservations;
+END;
+/
+CREATE or replace PROCEDURE check_in_out_report(start_date DATE, end_date DATE)
+AS
+  CURSOR c1 IS
+    SELECT check_in.g_id, check_in.r_id, check_in.cin_date,
+           check_out.cout_date
+    FROM check_in
+    JOIN check_out ON check_in.g_id = check_out.g_id AND check_in.r_id = check_out.r_id
+    WHERE check_in.cin_date BETWEEN start_date AND end_date;
+BEGIN
+  -- Print report header
+  DBMS_OUTPUT.PUT_LINE('CHECK-IN/OUT REPORT');
+  DBMS_OUTPUT.PUT_LINE('Date Range: ' || start_date || ' - ' || end_date);
+  DBMS_OUTPUT.PUT_LINE('-----------------------');
+  -- Print report rows
+  FOR row IN c1 LOOP
+    DBMS_OUTPUT.PUT_LINE(row.g_id || ' - ' || row.r_id || ' - ' || row.cin_date || ' - ' || row.cout_date);
+  END LOOP;
+END;
+/
+CREATE OR REPLACE PROCEDURE add_inv(invname IN varchar, invqty IN int,invrate in int) AS
+    invid int;
+BEGIN
+    select max(inv_id)+1 into invid from inventory;
+	if invid is NULL then
+        invid:=1;
+	end if;
+    INSERT INTO inventory(inv_id,inv_name,inv_qty,inv_rate) VALUES(invid,invname,invqty,invrate);
+    
+    DBMS_OUTPUT.PUT_LINE('New item '||invname||' Added with quantity: ' || invqty || '.');
+END; 
+/

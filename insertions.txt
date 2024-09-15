@@ -1,0 +1,112 @@
+begin
+	add_room(101,'standard','empty',10000);
+	add_room(102,'standard','empty',10000);
+	add_room(103,'standard','empty',10000);
+	add_room(104,'standard','empty',10000);
+	add_room(105,'standard','empty',10000);
+
+	add_room(201,'standard','empty',10000);
+	add_room(202,'standard','empty',10000);
+	add_room(203,'standard','empty',10000);
+	add_room(204,'standard','empty',10000);
+	add_room(205,'standard','empty',10000);
+
+	add_room(301,'deluxe','empty',15000);
+	add_room(302,'deluxe','empty',15000);
+	add_room(303,'deluxe','empty',15000);
+	add_room(304,'deluxe','empty',15000);
+	add_room(305,'deluxe','empty',15000);
+
+	add_room(401,'deluxe','empty',15000);
+	add_room(402,'deluxe','empty',15000);
+	add_room(403,'deluxe','empty',15000);
+	add_room(404,'deluxe','empty',15000);
+	add_room(405,'deluxe','empty',15000);
+
+	add_room(501,'suite','empty',25000);
+	add_room(502,'suite','empty',25000);
+	add_room(503,'suite','empty',25000);
+	add_room(504,'suite','empty',25000);
+	add_room(505,'suite','empty',25000);
+end;
+/
+begin
+    add_employee(1,'Ayesha Gupta','Manager',80000,'A404 Garden Heights, Patiala',9646481684);
+
+    add_employee(2,'Sandhya Gulati','Housekeeper',12000,'33 near rai bhadur road, patiala',9646481684);
+    add_employee(3,'Shiv Kumar','Housekeeper',12000,'42 gulab nagar, patiala',9014820571);
+    add_employee(4,'Rita Rani','Housekeeper',12000,'27 NTC school road, patiala',9057120148);
+    add_employee(5,'Honey Singh','Housekeeper',12000,'1443 ward 27c, patiala',9978155423);
+    add_employee(6,'Kamala','Housekeeper',12000,'273 gulab nagar, patiala',9787234561);
+
+    add_employee(7,'Himanshi Midha','Receptionist',22000,'320 Hostel N, Patiala',8054220871);
+    add_employee(8,'Virat Shah','Receptionist',22000,'',8008713452);
+
+    add_employee(9, 'John Doe', 'Waiter', 10000, '123 Main St, Anytown', 555-1234);
+    add_employee(10, 'Jane Smith', 'Waiter', 10000, '456 Oak St, Anytown', 555-5678);
+    add_employee(11, 'Bob Johnson', 'Waiter', 10000, '789 Elm St, Anytown', 555-9012);
+    add_employee(12, 'Sara Lee', 'Waiter', 10000, '321 Maple St, Anytown', 555-3456);
+    add_employee(13, 'Mike Johnson', 'Waiter', 10000, '654 Pine St, Anytown', 555-7890);
+
+
+	add_guest('Jatin Malik','13 Cornelia Street',7009854237,'jmalik@gmail.com');
+	add_guest('Kanishka','Sector 20, Panchkula',9763241876,'kani22@gmail.com');
+	add_guest('Harvey Spector','223, 5th Avenue',7634576344,'hs0308@gmail.com');
+	add_guest('Mike Ross','#2407, 37th Street Midtown South',964640406,'r142mr@gmail.com');
+	add_guest('Rachel Green','16th Avenue, NYC',964343406,'rg22@gmail.com');
+end; 
+/
+BEGIN
+    add_inv('Towel', 50, 10);
+    add_inv('Soap', 100, 5);
+    add_inv('Shampoo', 80, 8);
+    add_inv('Toothbrush', 70, 6);
+    add_inv('Toothpaste', 90, 4);
+    add_inv('Slippers', 30, 12);
+    add_inv('Hair dryer', 20, 20);
+    add_inv('Iron', 15, 25);
+    add_inv('Tea bags', 200, 2);
+    add_inv('Coffee sachets', 150, 3);
+END;
+/
+
+-- begin
+-- 	make_reservation(1,'suite',date'2023-05-05');
+-- 	make_reservation(2,'standard',date'2023-05-04');
+-- 	make_reservation(3,'suite',date'2023-05-02');
+-- 	make_reservation(4,'deluxe',date'2023-05-04');
+-- 	make_reservation(5,'deluxe',SYSDATE);
+--   reservations_report();
+-- 	cin_guest(1);
+-- 	cin_guest(2);
+-- 	cin_guest(3);
+-- 	cin_guest(4);
+-- 	cin_guest(5);
+-- end;
+-- /
+
+-- begin
+-- 	cout_guest(1,date'2023-05-06');
+-- 	cout_guest(2,date'2023-05-06');
+-- 	cout_guest(3,date'2023-05-08');
+-- 	cout_guest(4,SYSDATE);
+-- 	cout_guest(5,date'2023-05-10');
+-- end;
+--/
+--begin
+--	check_in_out_report(date'2023-05-01',date'2023-05-31');
+--end;
+
+/*DECLARE
+  p_g_id NUMBER;
+  p_r_type VARCHAR2(50);
+  p_check_in_date DATE;
+BEGIN
+  p_g_id := &guest_id;
+  p_r_type := '&room_type';
+  p_check_in_date := DATE '&check_in_date';
+
+  make_reservation(p_g_id, p_r_type, p_check_in_date);
+END;
+/
+*/
